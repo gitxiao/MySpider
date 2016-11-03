@@ -90,6 +90,7 @@ public class PageFetcher {
 		      conn.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)");     
 		      conn.connect();     
 		      String contentType = conn.getContentType();    
+//		      System.out.println("contentType = " + contentType);
 		      //在header里面找charset     
 		      result = findCharset(contentType);      
 		      //如果没找到的话，则一行一行的读入页面的html代码，从html代码中寻找     
@@ -97,6 +98,7 @@ public class PageFetcher {
 		         BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));     
 		         String line = reader.readLine();     
 		         while(line != null) {     
+//		        	 System.out.println("line = " + line);
 		             if(line.contains("Content-Type")) {    
 		                 result = findCharset(line);     
 		                 break;     
@@ -115,6 +117,7 @@ public class PageFetcher {
 	      
 	 //辅助函数     
 	 private String findCharset(String line) {    
+//		 System.out.println("findCharset line = " + line);
 	     int x = line.indexOf("charset=");     
 	     int y = line.lastIndexOf('\"');     
 	     if(x<0)     
