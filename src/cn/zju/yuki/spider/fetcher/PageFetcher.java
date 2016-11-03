@@ -57,7 +57,7 @@ public class PageFetcher {
 		
 		try{
 			encode = getCharset(url);
-			
+//			System.out.println("encode = " + encode);
 			// 获得信息载体
 			response = client.execute(getHttp);
 			statusCode = response.getStatusLine().getStatusCode();
@@ -65,7 +65,9 @@ public class PageFetcher {
 			
 			if(entity != null){
 				// 转化为文本信息, 设置爬取网页的字符集，防止乱码
-				content = EntityUtils.toString(entity, encode);
+				content = EntityUtils.toString(entity, encode == null ? "gbk" : encode);
+//				content = EntityUtils.toString(entity, encode == null ? "utf-8" : encode);
+//				content = EntityUtils.toString(entity, encode == null ? "unicode" : encode);
 			}
 		}catch(Exception e){
 			e.printStackTrace();

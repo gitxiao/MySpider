@@ -15,7 +15,8 @@ public class ContentParser {
 		
 		Elements elemTitle = doc.getElementsByTag("title");
 		String title = elemTitle.html();
-		System.out.println("标题:" + title + ",elemTitle.get(0) = " + elemTitle.get(0));
+//		System.out.println("标题:" + title + ",elemTitle.get(0) = " + elemTitle.get(0));
+		System.out.println("网页标题:" + title);
 		
 		
 //		Element elemContent = doc.getElementById("content");
