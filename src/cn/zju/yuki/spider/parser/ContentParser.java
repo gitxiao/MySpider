@@ -40,7 +40,7 @@ public class ContentParser {
 		// 通过URL判断
 		// TODO
 		
-		System.out.println(contentDoc.toString());
+//		System.out.println(contentDoc.toString());
 		// 通过content判断，比如需要抓取class为grid_view中的内容
 		if(contentDoc.getElementsByClass("grid_view") != null){
 			System.out.println(contentDoc.getElementsByClass("grid_view").toString());

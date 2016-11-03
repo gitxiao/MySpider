@@ -1,5 +1,9 @@
 package cn.zju.yuki.spider.fetcher;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.logging.Logger;
 
 import org.apache.http.HttpEntity;
@@ -45,13 +49,15 @@ public class PageFetcher {
 	public FetchedPage getContentFromUrl(String url){
 		String content = null;
 		int statusCode = 500;
-		
+		String encode = null;				//编码应自动获取
 		// 创建Get请求，并设置Header
 		HttpGet getHttp = new HttpGet(url);	
 		getHttp.setHeader("User-Agent","Mozilla/5.0 (Windows NT 6.1; rv:16.0) Gecko/20100101 Firefox/16.0");
-		HttpResponse response;
+		HttpResponse response = null;
 		
 		try{
+			encode = getCharset(url);
+			
 			// 获得信息载体
 			response = client.execute(getHttp);
 			statusCode = response.getStatusLine().getStatusCode();
@@ -59,10 +65,9 @@ public class PageFetcher {
 			
 			if(entity != null){
 				// 转化为文本信息, 设置爬取网页的字符集，防止乱码
-				content = EntityUtils.toString(entity, "GBK");
+				content = EntityUtils.toString(entity, encode);
 			}
-		}
-		catch(Exception e){
+		}catch(Exception e){
 			e.printStackTrace();
 			
 			// 因请求超时等问题产生的异常，将URL放回待抓取队列，重新爬取
@@ -71,5 +76,50 @@ public class PageFetcher {
 		}
 
 		return new FetchedPage(url, content, statusCode);
+	}
+	
+	
+	public String getCharset(String link) {   
+		  String result = null;     
+		  HttpURLConnection conn = null;   
+		  try {     
+		      URL url = new URL(link);     
+		      conn = (HttpURLConnection)url.openConnection();     
+		      conn.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)");     
+		      conn.connect();     
+		      String contentType = conn.getContentType();    
+		      //在header里面找charset     
+		      result = findCharset(contentType);      
+		      //如果没找到的话，则一行一行的读入页面的html代码，从html代码中寻找     
+		      if(result == null){     
+		         BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));     
+		         String line = reader.readLine();     
+		         while(line != null) {     
+		             if(line.contains("Content-Type")) {    
+		                 result = findCharset(line);     
+		                 break;     
+		             }     
+		             line = reader.readLine();     
+		         }     
+		     }     
+		 } catch (Exception e) {     
+		     // TODO Auto-generated catch block     
+		     e.printStackTrace();     
+		 } finally {   
+			 conn.disconnect();   
+		 }   
+		 return result;     
+	 }     
+	      
+	 //辅助函数     
+	 private String findCharset(String line) {    
+	     int x = line.indexOf("charset=");     
+	     int y = line.lastIndexOf('\"');     
+	     if(x<0)     
+	         return null;     
+	     else if(y>=0)    
+	         return line.substring(x+8, y);    
+	     else  
+	         return line.substring(x+8);   
 	}
 }

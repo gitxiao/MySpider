@@ -7,7 +7,11 @@ public class UrlQueue {
 	private static LinkedList<String> urlQueue = new LinkedList<String>();
 
 	public synchronized static void addElement(String url){
-		urlQueue.add(url);
+		if(!isContains(url)){
+			urlQueue.add(url);
+		}else{
+			System.out.println("已爬取的网址, 不再进入队列:" + url);
+		}
 	}
 	
 	public synchronized static void addFirstElement(String url){
