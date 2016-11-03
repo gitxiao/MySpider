@@ -1,11 +1,15 @@
 package cn.zju.yuki.spider.fetcher;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.logging.Logger;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -15,7 +19,12 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
+import cn.web.spider.utils.UrlUtils;
 import cn.zju.yuki.spider.model.FetchedPage;
 import cn.zju.yuki.spider.queue.UrlQueue;
 
@@ -80,7 +89,6 @@ public class PageFetcher {
 
 		return new FetchedPage(url, content, statusCode);
 	}
-	
 	
 	
 	/**获取网页的编码格式

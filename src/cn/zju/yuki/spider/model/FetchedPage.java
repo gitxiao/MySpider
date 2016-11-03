@@ -4,6 +4,7 @@ public class FetchedPage {
 	private String url;
 	private String content;
 	private int statusCode;
+	private int antiMode = -1;			//反爬模式,默认为-1,即该网页没有反爬措施
 	
 	public FetchedPage(){
 		
@@ -13,7 +14,6 @@ public class FetchedPage {
 		this.url = url;
 		this.content = content;
 		this.statusCode = statusCode;
-		
 	}
 	
 	public String getUrl() {
@@ -39,4 +39,14 @@ public class FetchedPage {
 	public void setStatusCode(int statusCode) {
 		this.statusCode = statusCode;
 	}
+
+	public int getAntiMode() {
+		return antiMode;
+	}
+
+	public void setAntiMode(int antiMode) {
+		this.antiMode = antiMode;
+	}
+	
+	
 }
