@@ -65,7 +65,8 @@ public class PageFetcher {
 			
 			if(entity != null){
 				// 转化为文本信息, 设置爬取网页的字符集，防止乱码
-				content = EntityUtils.toString(entity, encode == null ? "gbk" : encode);
+				content = EntityUtils.toString(entity, encode);
+//				content = EntityUtils.toString(entity, encode == null ? "gbk" : encode);
 //				content = EntityUtils.toString(entity, encode == null ? "utf-8" : encode);
 //				content = EntityUtils.toString(entity, encode == null ? "unicode" : encode);
 			}
@@ -81,6 +82,10 @@ public class PageFetcher {
 	}
 	
 	
+	
+	/**获取网页的编码格式
+	 * 
+	 */
 	public String getCharset(String link) {   
 		  String result = null;     
 		  HttpURLConnection conn = null;   
@@ -102,7 +107,11 @@ public class PageFetcher {
 		             if(line.contains("Content-Type")) {    
 		                 result = findCharset(line);     
 		                 break;     
-		             }     
+		             }else if(line.contains("<iframe")){
+		            	 String iframe = findIframeUrl(line);
+		            	 String newUrl = link + iframe;
+		            	 return getCharset(newUrl);
+		             }
 		             line = reader.readLine();     
 		         }     
 		     }     
@@ -120,11 +129,23 @@ public class PageFetcher {
 //		 System.out.println("findCharset line = " + line);
 	     int x = line.indexOf("charset=");     
 	     int y = line.lastIndexOf('\"');     
-	     if(x<0)     
+	     if(x < 0)     
 	         return null;     
-	     else if(y>=0)    
-	         return line.substring(x+8, y);    
+	     else if(y >= 0)    
+	         return line.substring(x + 8, y);    
 	     else  
-	         return line.substring(x+8);   
+	         return line.substring(x + 8);   
+	}
+	 
+	private String findIframeUrl(String line){
+//		System.out.println("findIframeUrl line = " + line);
+		int x = line.indexOf("src=");     
+	    int y = line.lastIndexOf('\"');     
+	    if(x < 0)     
+	        return null;     
+	    else if( y >= 0)    
+	        return line.substring(x + 5, y);    
+	    else  
+	        return line.substring(x + 5);   
 	}
 }

@@ -70,7 +70,7 @@ public class SpiderStarter {
 //		UrlQueue.addElement("http://www.mwr.gov.cn/");
 //		UrlQueue.addElement("http://www.hebwater.gov.cn/");
 //		UrlQueue.addElement("http://www.xjslt.gov.cn/");
-//		UrlQueue.addElement("http://www.xzwater.gov.cn/");
+//		UrlQueue.addElement("http://www.xzwater.gov.cn");
 //		UrlQueue.addElement("http://www.qhsl.gov.cn/");
 	}
 }
