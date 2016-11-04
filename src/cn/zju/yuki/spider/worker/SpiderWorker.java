@@ -12,6 +12,7 @@ import cn.zju.yuki.spider.model.FetchedPage;
 import cn.zju.yuki.spider.model.SpiderParams;
 import cn.zju.yuki.spider.parser.ContentParser;
 import cn.zju.yuki.spider.queue.UrlQueue;
+import cn.zju.yuki.spider.queue.VisitedUrlQueue;
 import cn.zju.yuki.spider.storage.DataStorage;
 
 public class SpiderWorker implements Runnable{
@@ -43,6 +44,12 @@ public class SpiderWorker implements Runnable{
 			// 从待抓取队列中拿URL
 			String url = UrlQueue.outElement();
 			
+			//拿到的url判断是否已经存在于已抓取队列,如果存在,则跳过
+			if(VisitedUrlQueue.isContains(url)){
+				continue;
+			}
+//			System.out.println("爬取url------------------------------------------------------:" + url);
+			
 			// 抓取URL指定的页面，并返回状态码和页面内容构成的FetchedPage对象
 			FetchedPage fetchedPage = fetcher.getContentFromUrl(url);
 			
@@ -64,8 +71,7 @@ public class SpiderWorker implements Runnable{
 			// delay
 			try {
 				Thread.sleep(SpiderParams.DEYLAY_TIME);			//等待新抓取的url进入队列
-			} 
-			catch (InterruptedException e) {
+			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}

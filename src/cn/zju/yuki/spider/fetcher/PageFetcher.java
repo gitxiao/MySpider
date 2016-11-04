@@ -21,6 +21,7 @@ import org.apache.http.util.EntityUtils;
 
 import cn.zju.yuki.spider.model.FetchedPage;
 import cn.zju.yuki.spider.queue.UrlQueue;
+import cn.zju.yuki.spider.queue.VisitedUrlQueue;
 
 public class PageFetcher {
 	private static final Logger Log = Logger.getLogger(PageFetcher.class.getName());
@@ -64,7 +65,12 @@ public class PageFetcher {
 			while((temp = bReader.readLine()) != null){
 				sb.append(temp + '\n');
 			}
+			
+			// 将URL放入已爬取队列
+			
 //			System.out.println("页面内容: sb.toString() = " + sb.toString());
+
+						
 		} catch (Exception e) {
 			// 因请求超时等问题产生的异常，将URL放回待抓取队列，重新爬取
 			Log.info(">> Put back url: " + url);

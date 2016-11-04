@@ -9,8 +9,10 @@ public class UrlQueue {
 	public synchronized static void addElement(String url){
 		if(!isContains(url)){
 			urlQueue.add(url);
+//			System.out.println("addElement 添加后");
+//			traversal();
 		}else{
-			System.out.println("已爬取的网址, 不再进入队列:" + url);
+//			System.out.println("已爬取的网址, 不再进入队列:" + url);
 		}
 	}
 	
@@ -19,7 +21,14 @@ public class UrlQueue {
 	}
 	
 	public synchronized static String outElement(){
-		return urlQueue.removeFirst();
+//		System.out.println("outElement 取出前:");
+//		traversal();
+
+		String url = urlQueue.removeFirst();
+		
+//		System.out.println("outElement 取出后:");
+//		traversal();
+		return url;
 	}
 	
 	public synchronized static boolean isEmpty(){
@@ -32,5 +41,13 @@ public class UrlQueue {
 	
 	public static boolean isContains(String url){
 		return urlQueue.contains(url);
+	}
+	
+	public static void traversal(){
+		System.out.println("UrlQueue 遍历开始===============================================>>>");
+		for(String url : urlQueue){
+			System.out.println("url = " + url);
+		}
+		System.out.println("UrlQueue 遍历结束===============================================<<<");
 	}
 }

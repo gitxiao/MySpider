@@ -8,6 +8,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
 import cn.zju.yuki.spider.model.FetchedPage;
+import cn.zju.yuki.spider.queue.UrlQueue;
 import cn.zju.yuki.spider.queue.VisitedUrlQueue;
 
 public class ContentParser {
@@ -19,6 +20,8 @@ public class ContentParser {
 		String title = elemTitle.html();
 //		System.out.println("标题:" + title + ",elemTitle.get(0) = " + elemTitle.get(0));
 //		System.out.println("网页标题:" + title);
+		
+		VisitedUrlQueue.addElement(fetchedPage.getUrl(),title);			//网页添加到爬取结果页面,TODO 持久化工作
 		
 		
 //		Element elemContent = doc.getElementById("content");
@@ -38,16 +41,15 @@ public class ContentParser {
 				aLink = matcherA.group();
 				newUrl = getUrlFromALink(fetchedPage.getUrl(),aLink);
 				urlDesc = getDescOfALink(aLink);
-				System.out.println("aLink = " + aLink);
-				System.out.println("newUrl = " + newUrl);
-				System.out.println("urlDesc = " + urlDesc);
+//				System.out.println("aLink = " + aLink);
+//				System.out.println("newUrl = " + newUrl);
+//				System.out.println("urlDesc = " + urlDesc);
+//				System.out.println(urlDesc + ":	" + newUrl);
+				UrlQueue.addElement(newUrl);
 			}
 			
 
 //		}
-		
-		// 将URL放入已爬取队列
-		VisitedUrlQueue.addElement(fetchedPage.getUrl());
 		
 		// 根据当前页面和URL获取下一步爬取的URLs
 		// TODO
@@ -100,7 +102,7 @@ public class ContentParser {
 	 */
 	private String getDescOfALink(String aLink){
 		String desc = getSubStringFrom(aLink,">","<");
-		if(desc.contains("<img")){
+		if(desc.contains("<img") || desc.contains("<Img") || desc.contains("src=")){
 			desc = "图片链接";
 		}
 		return desc;
