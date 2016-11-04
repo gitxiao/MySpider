@@ -7,7 +7,7 @@ public class ContentHandler {
 	public boolean check(FetchedPage fetchedPage){
 		// 如果抓取的页面包含反爬取内容，则将当前URL放入待爬取队列，以便重新爬取
 		if(isAntiScratch(fetchedPage)){
-			UrlQueue.addFirstElement(fetchedPage.getUrl());
+			UrlQueue.addLastElement(fetchedPage.getUrl());
 			return false;
 		}
 		
@@ -32,6 +32,7 @@ public class ContentHandler {
 			return true;
 		}
 		
+		//TODO, 这里应该返回反爬策略的代码, 否则再次爬取时依然会被屏蔽
 		return false;
 	}
 }

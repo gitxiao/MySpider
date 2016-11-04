@@ -4,12 +4,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.logging.Logger;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -19,12 +18,7 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
-import cn.web.spider.utils.UrlUtils;
 import cn.zju.yuki.spider.model.FetchedPage;
 import cn.zju.yuki.spider.queue.UrlQueue;
 
@@ -50,12 +44,42 @@ public class PageFetcher {
 		client.getConnectionManager().shutdown();
 	}
 	
+	
 	/**
+	 * 用URL
+	 * @param url
+	 * @return
+	 * 超链接正则:<a[\s\S]+?</a>
+	 */
+	public FetchedPage getContentFromUrl(String urlStr){
+		URL url = null;
+		BufferedReader bReader = null;
+		StringBuffer sb = new StringBuffer();
+		String encode = null;
+		try {
+			encode = getCharset(urlStr);
+			url = new URL(urlStr);
+			bReader = new BufferedReader(new InputStreamReader(url.openStream(),Charset.forName(encode)));
+			String temp = "";
+			while((temp = bReader.readLine()) != null){
+				sb.append(temp + '\n');
+			}
+//			System.out.println("页面内容: sb.toString() = " + sb.toString());
+		} catch (Exception e) {
+			// 因请求超时等问题产生的异常，将URL放回待抓取队列，重新爬取
+			Log.info(">> Put back url: " + url);
+//			UrlQueue.addLastElement(urlStr);			//TODO 重新放回队列时应该计数,否则如果一直有异常,会无限重新爬取
+		}
+		return new FetchedPage(urlStr, sb.toString(), 1);
+	}
+	
+	/**
+	 * 用HttpGet
 	 * 根据url爬取网页内容
 	 * @param url
 	 * @return
 	 */
-	public FetchedPage getContentFromUrl(String url){
+	public FetchedPage getContentFromUrl_(String url){
 		String content = null;
 		int statusCode = 500;
 		String encode = null;				//编码应自动获取
@@ -75,16 +99,13 @@ public class PageFetcher {
 			if(entity != null){
 				// 转化为文本信息, 设置爬取网页的字符集，防止乱码
 				content = EntityUtils.toString(entity, encode);
-//				content = EntityUtils.toString(entity, encode == null ? "gbk" : encode);
-//				content = EntityUtils.toString(entity, encode == null ? "utf-8" : encode);
-//				content = EntityUtils.toString(entity, encode == null ? "unicode" : encode);
 			}
 		}catch(Exception e){
 			e.printStackTrace();
 			
 			// 因请求超时等问题产生的异常，将URL放回待抓取队列，重新爬取
 			Log.info(">> Put back url: " + url);
-			UrlQueue.addFirstElement(url);
+//			UrlQueue.addLastElement(url);				
 		}
 
 		return new FetchedPage(url, content, statusCode);

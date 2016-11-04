@@ -14,8 +14,8 @@ public class UrlQueue {
 		}
 	}
 	
-	public synchronized static void addFirstElement(String url){
-		urlQueue.addFirst(url);
+	public synchronized static void addLastElement(String url){
+		urlQueue.addLast(url);
 	}
 	
 	public synchronized static String outElement(){
