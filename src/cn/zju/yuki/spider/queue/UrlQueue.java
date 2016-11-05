@@ -9,6 +9,7 @@ public class UrlQueue {
 	public synchronized static void addElement(String url){
 		if(!isContains(url)){
 			urlQueue.add(url);
+			System.out.println("UrlQueue addElement 待爬取url: " + url);
 //			System.out.println("addElement 添加后");
 //			traversal();
 		}else{

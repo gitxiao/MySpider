@@ -57,9 +57,12 @@ public class PageFetcher {
 		BufferedReader bReader = null;
 		StringBuffer sb = new StringBuffer();
 		String encode = null;
+		String urlHeader = null;
 		try {
 			encode = getCharset(urlStr);
 			url = new URL(urlStr);
+			int index = urlStr.indexOf("//");
+			urlHeader = urlStr.substring(0,index + 2) + url.getHost();
 			bReader = new BufferedReader(new InputStreamReader(url.openStream(),Charset.forName(encode)));
 			String temp = "";
 			while((temp = bReader.readLine()) != null){
@@ -73,10 +76,12 @@ public class PageFetcher {
 						
 		} catch (Exception e) {
 			// 因请求超时等问题产生的异常，将URL放回待抓取队列，重新爬取
+			e.printStackTrace();
 			Log.info(">> Put back url: " + url);
+			VisitedUrlQueue.addElementWithException(urlStr,"异常");
 //			UrlQueue.addLastElement(urlStr);			//TODO 重新放回队列时应该计数,否则如果一直有异常,会无限重新爬取
 		}
-		return new FetchedPage(urlStr, sb.toString(), 1);
+		return new FetchedPage(urlHeader,urlStr, sb.toString(), 1);
 	}
 	
 	/**
@@ -114,11 +119,12 @@ public class PageFetcher {
 //			UrlQueue.addLastElement(url);				
 		}
 
-		return new FetchedPage(url, content, statusCode);
+		return new FetchedPage("",url, content, statusCode);
 	}
 	
 	
-	/**获取网页的编码格式
+	/**
+	 * 获取网页的编码格式
 	 * 
 	 */
 	public String getCharset(String link) {   
@@ -139,13 +145,15 @@ public class PageFetcher {
 		         String line = reader.readLine();     
 		         while(line != null) {     
 //		        	 System.out.println("line = " + line);
-		             if(line.contains("Content-Type")) {    
+		             if(line.contains("Content-Type") || line.contains("content-Type")) {    
 		                 result = findCharset(line);     
-		                 break;     
+		             } 
+		             if(result != null){
+		            	 break; 
 		             }else if(line.contains("<iframe")){
-		            	 String iframe = findIframeUrl(line);
-		            	 String newUrl = link + iframe;
-		            	 return getCharset(newUrl);
+		            	 String iframe = findIframeUrl(link,line);
+//		            	 UrlQueue.addElement(iframe);				//TODO 	iframe如何处理, 是否需要添加到未爬取队列
+		            	 return getCharset(iframe);
 		             }
 		             line = reader.readLine();     
 		         }     
@@ -153,6 +161,7 @@ public class PageFetcher {
 		 } catch (Exception e) {     
 		     // TODO Auto-generated catch block     
 		     e.printStackTrace();     
+		     System.out.println("异常 link = " + link);
 		 } finally {   
 			 conn.disconnect();   
 		 }   
@@ -172,15 +181,28 @@ public class PageFetcher {
 	         return line.substring(x + 8);   
 	}
 	 
-	private String findIframeUrl(String line){
-//		System.out.println("findIframeUrl line = " + line);
+	private String findIframeUrl(String link,String line){
+		System.out.println("findIframeUrl line = " + line);
 		int x = line.indexOf("src=");     
-	    int y = line.lastIndexOf('\"');     
+//	    int y = line.lastIndexOf('\"');     
+	    int y = line.indexOf("\"", x + 6);
+	    String iframe = null;
 	    if(x < 0)     
-	        return null;     
+	    	iframe = null;     
 	    else if( y >= 0)    
-	        return line.substring(x + 5, y);    
+	    	iframe = line.substring(x + 5, y);    
 	    else  
-	        return line.substring(x + 5);   
+	    	iframe = line.substring(x + 5);   
+	    
+	    iframe = iframe.trim();
+	    
+	    if(iframe.startsWith("http://") || iframe.startsWith("https://")){
+	    	iframe = iframe;
+		}else{
+			iframe = link + iframe;
+		}
+	    
+	    System.out.println("iframe = " + iframe);
+	    return iframe;
 	}
 }

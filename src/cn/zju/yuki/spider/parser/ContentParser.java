@@ -1,12 +1,9 @@
 package cn.zju.yuki.spider.parser;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
-
 import cn.zju.yuki.spider.model.FetchedPage;
 import cn.zju.yuki.spider.queue.UrlQueue;
 import cn.zju.yuki.spider.queue.VisitedUrlQueue;
@@ -14,7 +11,16 @@ import cn.zju.yuki.spider.queue.VisitedUrlQueue;
 public class ContentParser {
 	public Object parse(FetchedPage fetchedPage){
 		Object targetObject = null;
-		Document doc = Jsoup.parse(fetchedPage.getContent());
+		Document doc = Jsoup.parse(fetchedPage.getContent(),"http://" + fetchedPage.getUrlHeader());
+		
+//        Elements links = doc.getElementsByTag("a"); 
+//        if (!links.isEmpty()) { 
+//            for (Element link : links) { 
+//                String linkHref = link.absUrl("href"); 
+//                String linkText = link.text(); 
+//                System.out.println(linkText + "*:*" + linkHref); 
+//            } 
+//        }
 		
 		Elements elemTitle = doc.getElementsByTag("title");
 		String title = elemTitle.html();
@@ -39,13 +45,15 @@ public class ContentParser {
 			Matcher matcherA = patternA.matcher(fetchedPage.getContent());
 			while(matcherA.find()){
 				aLink = matcherA.group();
-				newUrl = getUrlFromALink(fetchedPage.getUrl(),aLink);
+				newUrl = getUrlFromALink(fetchedPage,aLink);
 				urlDesc = getDescOfALink(aLink);
 //				System.out.println("aLink = " + aLink);
 //				System.out.println("newUrl = " + newUrl);
 //				System.out.println("urlDesc = " + urlDesc);
 //				System.out.println(urlDesc + ":	" + newUrl);
-				UrlQueue.addElement(newUrl);
+				if(newUrl != null){								//TODO 监测是否合法url 
+					UrlQueue.addElement(newUrl);
+				}
 			}
 			
 
@@ -77,19 +85,44 @@ public class ContentParser {
 	 * @param aLink
 	 * @return
 	 */
-	private String getUrlFromALink(String url,String aLink){
+	private String getUrlFromALink(FetchedPage fetchedPage,String aLink){
 		String newUrl = null;
 		Pattern patternHref = Pattern.compile("href=\"(.+?)\"");
 		Matcher matcherHref = patternHref.matcher(aLink);
+		String href = null;
 		if(matcherHref.find()){
-			String href = matcherHref.group(1);
+			href = matcherHref.group(1).trim();
 			if(href.length() < 2){
 				href = "";			//有时href="#",这种不需要重新爬取
 			}
-			if(href.contains("http://") || href.contains("https://")){
+			if(href.startsWith("http://") || href.startsWith("https://")){
 				newUrl = href;
 			}else{
-				newUrl = url + href;
+				newUrl = fetchedPage.getUrlHeader() + href;
+//				System.out.println("fetchedPage.getUrl(),href,newUrl = " + fetchedPage.getUrl() + ",  " + href + ",  " + newUrl);
+				
+			}
+		}
+		
+		if(newUrl != null){
+			if(newUrl.contains("http://pmm.people.com.cn/main/s?user=people|2016people|D_icon_left&db=people&border=0&local=yes")){
+				System.out.println("fetchedPage.getUrl() = " + fetchedPage.getUrl());
+				System.out.println("aLink = " + aLink);
+				System.out.println("href = " + href);
+				System.out.println("newUrl = " + newUrl);
+			}
+			
+			newUrl = newUrl.trim();
+			if(!newUrl.startsWith("http") || newUrl.substring(1).contains("http")){
+				System.out.println("fetchedPage.getUrl() = " + fetchedPage.getUrl());
+				System.out.println("aLink = " + aLink);
+				System.out.println("href = " + href);
+				System.out.println("newUrl = " + newUrl);
+				System.out.println("newUrl.startsWith(\"http\") = " + newUrl.startsWith("http"));
+				System.out.println("newUrl.substring(1) = " + newUrl.substring(1));
+				System.out.println("newUrl.substring(1).contains(\"http\") = " + newUrl.substring(1).contains("http"));
+				System.out.println("newUrl.substring(4) = " + newUrl.substring(4));
+				System.out.println("newUrl.substring(4).contains(\"http\") = " + newUrl.substring(4).contains("http"));
 			}
 		}
 		return newUrl;
@@ -124,4 +157,5 @@ public class ContentParser {
 		}
 		return child;
 	}
+	
 }
