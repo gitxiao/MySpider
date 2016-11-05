@@ -92,10 +92,10 @@ public class ContentParser {
 		String href = null;
 		if(matcherHref.find()){
 			href = matcherHref.group(1).trim();
-			if(href.length() < 2){
-				href = "";			//有时href="#",这种不需要重新爬取
+			if(href.length() < 2 || href.startsWith("javascript:")){
+				return null;
 			}
-			if(href.startsWith("http://") || href.startsWith("https://")){
+			if(href.startsWith("http:") || href.startsWith("https:")){
 				newUrl = href;
 			}else{
 				newUrl = fetchedPage.getUrlHeader() + href;
@@ -114,15 +114,13 @@ public class ContentParser {
 			
 			newUrl = newUrl.trim();
 			if(!newUrl.startsWith("http") || newUrl.substring(1).contains("http")){
-				System.out.println("fetchedPage.getUrl() = " + fetchedPage.getUrl());
 				System.out.println("aLink = " + aLink);
 				System.out.println("href = " + href);
-				System.out.println("newUrl = " + newUrl);
 				System.out.println("newUrl.startsWith(\"http\") = " + newUrl.startsWith("http"));
 				System.out.println("newUrl.substring(1) = " + newUrl.substring(1));
 				System.out.println("newUrl.substring(1).contains(\"http\") = " + newUrl.substring(1).contains("http"));
-				System.out.println("newUrl.substring(4) = " + newUrl.substring(4));
-				System.out.println("newUrl.substring(4).contains(\"http\") = " + newUrl.substring(4).contains("http"));
+				System.out.println("fetchedPage.getUrl() = " + fetchedPage.getUrl());
+				System.out.println("newUrl = " + newUrl);
 			}
 		}
 		return newUrl;
